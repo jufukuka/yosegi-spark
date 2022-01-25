@@ -16,29 +16,34 @@
  * limitations under the License.
  */
 name := "Yosegi Spark v3.0.0"
-version := "1.0"
-scalaVersion := "2.12.10"
+version := "2.0.0-SNAPSHOT"
+scalaVersion := "2.12.14"
 fork := true
 organization := "jp.co.yahoo.yosegi"
 
+resolvers +=
+  "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots"
+
 javacOptions ++= Seq("-source", "1.8", "-target", "1.8", "-encoding", "UTF-8")
 
-libraryDependencies += "junit" % "junit" % "4.12" % "test"
+libraryDependencies += "org.junit.jupiter" % "junit-jupiter-api" % "5.8.2" % "test"
+libraryDependencies += "org.junit.jupiter" % "junit-jupiter-engine" % "5.8.2" % "test"
+libraryDependencies += "org.junit.jupiter" % "junit-jupiter-params" % "5.8.2" % "test"
 libraryDependencies += "com.novocode" % "junit-interface" % "0.11" % Test exclude("junit", "junit-dep") 
 
-libraryDependencies += "com.fasterxml.jackson.core" % "jackson-core" % "2.9.8"
-libraryDependencies += "com.fasterxml.jackson.core" % "jackson-databind" % "2.9.8"
-libraryDependencies += "com.fasterxml.jackson.module" % "jackson-module-scala_2.12" % "2.9.8"
+libraryDependencies += "com.fasterxml.jackson.core" % "jackson-core" % "2.13.2"
+libraryDependencies += "com.fasterxml.jackson.core" % "jackson-databind" % "2.13.2.1"
+libraryDependencies += "com.fasterxml.jackson.module" % "jackson-module-scala_2.12" % "2.13.2"
 
-libraryDependencies += "org.apache.spark" % "spark-core_2.12" % "3.0.0"
-libraryDependencies += "org.apache.spark" % "spark-sql_2.12" % "3.0.0"
+libraryDependencies += "org.apache.spark" % "spark-core_2.12" % "3.2.1"
+libraryDependencies += "org.apache.spark" % "spark-sql_2.12" % "3.2.1"
 
-libraryDependencies += "jp.co.yahoo.yosegi" % "yosegi" % "1.0.0"
+libraryDependencies += "jp.co.yahoo.yosegi" % "yosegi" % "2.0.2-SNAPSHOT"
 
 
 // release for Maven
 publishMavenStyle := true
-publishArtifact in Test := false
+Test / publishArtifact := false
 pomIncludeRepository := { _ => false }
 
 
@@ -58,7 +63,7 @@ developers := List(
     id    = "koijima",
     name  = "Koji Ijima",
     email = "kijima@yahoo-corp.jp",
-    url   = url("http://")
+    url   = url("https://github.com/koijima")
   )
 )
 
