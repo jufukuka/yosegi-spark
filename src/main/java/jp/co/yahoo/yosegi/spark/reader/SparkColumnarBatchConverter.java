@@ -21,6 +21,7 @@ import jp.co.yahoo.yosegi.spark.utils.PartitionColumnUtil;
 import org.apache.spark.sql.catalyst.InternalRow;
 import org.apache.spark.sql.execution.vectorized.WritableColumnVector;
 import org.apache.spark.sql.types.StructType;
+import org.apache.spark.sql.vectorized.ColumnVector;
 import org.apache.spark.sql.vectorized.ColumnarBatch;
 
 import java.io.IOException;
@@ -31,7 +32,7 @@ public class SparkColumnarBatchConverter implements IRawConverter<ColumnarBatch>
   private final StructType schema;
   private final StructType partitionSchema;
   private final InternalRow partitionValue;
-  private final WritableColumnVector[] childColumns;
+  private final ColumnVector[] childColumns;
   private final Map<String, Integer> keyIndexMap;
 
   public SparkColumnarBatchConverter(
@@ -39,7 +40,7 @@ public class SparkColumnarBatchConverter implements IRawConverter<ColumnarBatch>
       final StructType partitionSchema,
       final InternalRow partitionValue,
       final Map<String, Integer> keyIndexMap,
-      final WritableColumnVector[] childColumns) {
+      final ColumnVector[] childColumns) {
     this.schema = schema;
     this.partitionSchema = partitionSchema;
     this.partitionValue = partitionValue;
@@ -50,13 +51,13 @@ public class SparkColumnarBatchConverter implements IRawConverter<ColumnarBatch>
   @Override
   public ColumnarBatch convert(final List<ColumnBinary> raw, final int loadSize) throws IOException {
     // NOTE: initialize
-    for (int i = 0; i < childColumns.length; i++) {
+    for (int i = 0; i < schema.length(); i++) {
       // FIXME: how to initialize vector with dictionary.
-      childColumns[i].reset();
-      childColumns[i].reserve(loadSize);
-      if (childColumns[i].hasDictionary()) {
-        childColumns[i].reserveDictionaryIds(0);
-        childColumns[i].setDictionary(null);
+      ((WritableColumnVector) childColumns[i]).reset();
+      ((WritableColumnVector) childColumns[i]).reserve(loadSize);
+      if (((WritableColumnVector) childColumns[i]).hasDictionary()) {
+        ((WritableColumnVector) childColumns[i]).reserveDictionaryIds(0);
+        ((WritableColumnVector) childColumns[i]).setDictionary(null);
       }
     }
     final ColumnarBatch result = new ColumnarBatch(childColumns);
@@ -69,16 +70,16 @@ public class SparkColumnarBatchConverter implements IRawConverter<ColumnarBatch>
       }
       final int index = keyIndexMap.get(columnBinary.columnName);
       isSet[index] = true;
-      SparkLoaderFactoryUtil.createLoaderFactory(childColumns[index]).create(columnBinary, loadSize);
+      SparkLoaderFactoryUtil.createLoaderFactory(((WritableColumnVector) childColumns[index])).create(columnBinary, loadSize);
     }
     // NOTE: null columns
-    for (int i = 0; i < childColumns.length; i++) {
+    for (int i = 0; i < schema.length(); i++) {
       if (!isSet[i]) {
-        childColumns[i].putNulls(0, loadSize);
+        ((WritableColumnVector) childColumns[i]).putNulls(0, loadSize);
       }
     }
     // NOTE: partitionColumns
-    final WritableColumnVector[] partColumns =
+    final ColumnVector[] partColumns =
         PartitionColumnUtil.createPartitionColumns(partitionSchema, partitionValue, loadSize);
     for (int i = schema.length(), n = 0; i < childColumns.length; i++, n++) {
       childColumns[i] = partColumns[n];

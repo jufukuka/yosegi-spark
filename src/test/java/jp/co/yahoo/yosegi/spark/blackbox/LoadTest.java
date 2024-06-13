@@ -43,7 +43,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class Load {
+public class LoadTest {
   private static SparkSession spark;
   private static SQLContext sqlContext;
   private static String appName = "LoadTest";
@@ -63,7 +63,11 @@ public class Load {
   }
 
   public String getTmpPath() {
-    return System.getProperty("java.io.tmpdir") + appName + ".yosegi";
+    String tmpdir = System.getProperty("java.io.tmpdir");
+    if (tmpdir.endsWith("/")) {
+      tmpdir = tmpdir.substring(0, tmpdir.length() - 1);
+    }
+    return tmpdir + "/" + appName + ".yosegi";
   }
 
   public Dataset<Row> loadJsonFile(final String resource, final StructType schema) {
