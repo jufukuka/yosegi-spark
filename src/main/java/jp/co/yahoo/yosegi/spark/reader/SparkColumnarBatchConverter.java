@@ -50,7 +50,7 @@ public class SparkColumnarBatchConverter implements IRawConverter<ColumnarBatch>
   @Override
   public ColumnarBatch convert(final List<ColumnBinary> raw, final int loadSize) throws IOException {
     // NOTE: initialize
-    for (int i = 0; i < childColumns.length; i++) {
+    for (int i = 0; i < schema.length(); i++) {
       // FIXME: how to initialize vector with dictionary.
       childColumns[i].reset();
       childColumns[i].reserve(loadSize);
@@ -72,7 +72,7 @@ public class SparkColumnarBatchConverter implements IRawConverter<ColumnarBatch>
       SparkLoaderFactoryUtil.createLoaderFactory(childColumns[index]).create(columnBinary, loadSize);
     }
     // NOTE: null columns
-    for (int i = 0; i < childColumns.length; i++) {
+    for (int i = 0; i < schema.length(); i++) {
       if (!isSet[i]) {
         childColumns[i].putNulls(0, loadSize);
       }
