@@ -20,9 +20,9 @@ import jp.co.yahoo.yosegi.reader.YosegiReader;
 import jp.co.yahoo.yosegi.spread.expression.IExpressionNode;
 import org.apache.spark.sql.catalyst.InternalRow;
 import org.apache.spark.sql.execution.vectorized.OnHeapColumnVector;
-import org.apache.spark.sql.execution.vectorized.WritableColumnVector;
 import org.apache.spark.sql.types.StructField;
 import org.apache.spark.sql.types.StructType;
+import org.apache.spark.sql.vectorized.ColumnVector;
 import org.apache.spark.sql.vectorized.ColumnarBatch;
 
 import java.io.IOException;
@@ -33,7 +33,7 @@ import java.util.Map;
 public class SparkColumnarBatchReader implements IColumnarBatchReader {
 
   private final WrapReader<ColumnarBatch> reader;
-  private final WritableColumnVector[] childColumns;
+  private final ColumnVector[] childColumns;
 
   public SparkColumnarBatchReader(
       final StructType partitionSchema,
@@ -47,7 +47,7 @@ public class SparkColumnarBatchReader implements IColumnarBatchReader {
       final IExpressionNode node)
       throws IOException {
     final StructField[] fields = schema.fields();
-    childColumns = new OnHeapColumnVector[schema.length() + partitionSchema.length()];
+    childColumns = new ColumnVector[schema.length() + partitionSchema.length()];
     final Map<String, Integer> keyIndexMap = new HashMap<String, Integer>();
     for (int i = 0; i < fields.length; i++) {
       keyIndexMap.put(fields[i].name(), i);
@@ -85,6 +85,9 @@ public class SparkColumnarBatchReader implements IColumnarBatchReader {
   public void close() throws Exception {
     reader.close();
     for (int i = 0; i < childColumns.length; i++) {
+      if (childColumns[i] == null) {
+        continue;
+      }
       childColumns[i].close();
     }
   }

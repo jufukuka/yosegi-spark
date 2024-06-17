@@ -118,7 +118,7 @@ class YosegiFileFormat extends FileFormat with DataSourceRegister with Serializa
       val readSchema:DataType = DataType.fromJson( requiredSchemaJson )
       val partSchema:DataType = DataType.fromJson( partitionSchemaJson )
       assert(file.partitionValues.numFields == partitionSchema.size )
-      val path:Path = new Path( new URI(file.filePath) )
+      val path:Path = file.filePath.toPath
       val fs:FileSystem = path.getFileSystem( broadcastedHadoopConf.value.value )
       val yosegiConfig = new jp.co.yahoo.yosegi.config.Configuration()
       if( expandOption.nonEmpty ){

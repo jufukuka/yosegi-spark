@@ -17,20 +17,21 @@
  */
 package jp.co.yahoo.yosegi.spark.utils;
 
+import org.apache.spark.sql.execution.vectorized.ConstantColumnVector;
 import org.apache.spark.sql.types.StructType;
 import org.apache.spark.sql.types.StructField;
 import org.apache.spark.sql.catalyst.InternalRow;
-import org.apache.spark.sql.execution.vectorized.OnHeapColumnVector;
 import org.apache.spark.sql.execution.vectorized.ColumnVectorUtils;
+import org.apache.spark.sql.vectorized.ColumnVector;
 
 public final class PartitionColumnUtil{
 
-  public static OnHeapColumnVector[] createPartitionColumns( final StructType partitionColumns , final InternalRow partitionValues , final int rowCount ){
+  public static ColumnVector[] createPartitionColumns( final StructType partitionColumns , final InternalRow partitionValues , final int rowCount ){
     StructField[] fields = partitionColumns.fields();
-    OnHeapColumnVector[] vectors = new OnHeapColumnVector[ fields.length ];
+    ColumnVector[] vectors = new ConstantColumnVector[ fields.length ];
     for( int i = 0 ; i < vectors.length ; i++ ){
-      vectors[i] = new OnHeapColumnVector( rowCount , fields[i].dataType() );
-      ColumnVectorUtils.populate( vectors[i] , partitionValues , i );
+      vectors[i] = new ConstantColumnVector( rowCount , fields[i].dataType() );
+      ColumnVectorUtils.populate( (ConstantColumnVector) vectors[i] , partitionValues , i );
     }
     return vectors;
   }
