@@ -20,6 +20,7 @@ import jp.co.yahoo.yosegi.spark.inmemory.SparkLoaderFactoryUtil;
 import jp.co.yahoo.yosegi.spark.utils.PartitionColumnUtil;
 import org.apache.spark.sql.catalyst.InternalRow;
 import org.apache.spark.sql.execution.vectorized.WritableColumnVector;
+import org.apache.spark.sql.types.ArrayType;
 import org.apache.spark.sql.types.StructType;
 import org.apache.spark.sql.vectorized.ColumnVector;
 import org.apache.spark.sql.vectorized.ColumnarBatch;
@@ -75,7 +76,13 @@ public class SparkColumnarBatchConverter implements IRawConverter<ColumnarBatch>
     // NOTE: null columns
     for (int i = 0; i < schema.length(); i++) {
       if (!isSet[i]) {
-        ((WritableColumnVector) childColumns[i]).putNulls(0, loadSize);
+        if (childColumns[i].dataType().getClass() == ArrayType.class) {
+          for (int j = 0; j < loadSize; j++) {
+            ((WritableColumnVector) childColumns[i]).putArray(j, 0, 0);
+          }
+        } else {
+          ((WritableColumnVector) childColumns[i]).putNulls(0, loadSize);
+        }
       }
     }
     // NOTE: partitionColumns

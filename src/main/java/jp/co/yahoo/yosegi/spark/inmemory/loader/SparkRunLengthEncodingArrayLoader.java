@@ -49,7 +49,8 @@ public class SparkRunLengthEncodingArrayLoader
 
   @Override
   public void setNull(final int index) throws IOException {
-    vector.putNull(index);
+    //vector.putNull(index);
+    vector.putArray(index, 0, 0);
   }
 
   @Override
@@ -59,7 +60,8 @@ public class SparkRunLengthEncodingArrayLoader
   public void setNullAndRepetitions(
       final int startIndex, final int repetitions, final int rowGroupIndex) throws IOException {
     for (int i = 0; i < repetitions; i++) {
-      vector.putNull(rowId);
+      //vector.putNull(rowId);
+      vector.putArray(rowId, 0, 0);
       rowId++;
     }
   }

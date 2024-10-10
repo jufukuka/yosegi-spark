@@ -43,6 +43,7 @@ public class SparkLoaderFactoryUtil {
       // FIXME: vector is null?
     }
     final Class klass = vector.dataType().getClass();
+    System.out.println(klass.getName());
     if (klass == ArrayType.class) {
       return new SparkArrayLoaderFactory(vector);
     } else if (klass == StructType.class) {

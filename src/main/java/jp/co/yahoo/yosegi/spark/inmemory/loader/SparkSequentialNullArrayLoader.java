@@ -14,21 +14,25 @@
  */
 package jp.co.yahoo.yosegi.spark.inmemory.loader;
 
-import jp.co.yahoo.yosegi.binary.ColumnBinary;
-import jp.co.yahoo.yosegi.inmemory.IArrayLoader;
-import jp.co.yahoo.yosegi.spark.inmemory.SparkLoaderFactoryUtil;
+import jp.co.yahoo.yosegi.inmemory.ISequentialLoader;
+import jp.co.yahoo.yosegi.inmemory.LoadType;
 import org.apache.spark.sql.execution.vectorized.WritableColumnVector;
 
-import javax.lang.model.type.ArrayType;
 import java.io.IOException;
 
-public class SparkArrayLoader implements IArrayLoader<WritableColumnVector> {
+public class SparkSequentialNullArrayLoader implements ISequentialLoader<WritableColumnVector> {
+
   private final WritableColumnVector vector;
   private final int loadSize;
 
-  public SparkArrayLoader(final WritableColumnVector vector, final int loadSize) {
+  public SparkSequentialNullArrayLoader(final WritableColumnVector vector, final int loadSize) {
     this.vector = vector;
     this.loadSize = loadSize;
+  }
+
+  @Override
+  public LoadType getLoaderType() {
+    return LoadType.SEQUENTIAL;
   }
 
   @Override
@@ -38,34 +42,18 @@ public class SparkArrayLoader implements IArrayLoader<WritableColumnVector> {
 
   @Override
   public void setNull(final int index) throws IOException {
-    //vector.putNull(index);
+    // TODO:
     vector.putArray(index, 0, 0);
   }
 
   @Override
   public void finish() throws IOException {
     // FIXME:
+    //vector.putNulls(0, loadSize);
   }
 
   @Override
   public WritableColumnVector build() throws IOException {
     return vector;
-  }
-
-  @Override
-  public void setArrayIndex(final int index, final int start, final int length) throws IOException {
-    vector.putArray(index, start, length);
-  }
-
-  @Override
-  public void loadChild(final ColumnBinary columnBinary, final int childLength) throws IOException {
-    vector.getChild(0).reset();
-    vector.getChild(0).reserve(childLength);
-    if (vector.getChild(0).hasDictionary()) {
-      vector.getChild(0).reserveDictionaryIds(0);
-      vector.getChild(0).setDictionary(null);
-    }
-    SparkLoaderFactoryUtil.createLoaderFactory(vector.getChild(0))
-        .create(columnBinary, childLength);
   }
 }
