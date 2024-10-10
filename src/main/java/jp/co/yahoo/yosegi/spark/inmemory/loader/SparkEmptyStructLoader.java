@@ -14,27 +14,37 @@
  */
 package jp.co.yahoo.yosegi.spark.inmemory.loader;
 
-import jp.co.yahoo.yosegi.binary.ColumnBinary;
-import jp.co.yahoo.yosegi.inmemory.IUnionLoader;
-import jp.co.yahoo.yosegi.spark.inmemory.SparkLoaderFactoryUtil;
-import jp.co.yahoo.yosegi.spread.column.ColumnType;
+import jp.co.yahoo.yosegi.inmemory.ILoader;
+import jp.co.yahoo.yosegi.inmemory.LoadType;
 import org.apache.spark.sql.execution.vectorized.WritableColumnVector;
+import org.apache.spark.sql.types.StructType;
 
 import java.io.IOException;
 
-public class SparkUnionArrayLoader implements IUnionLoader<WritableColumnVector> {
+public class SparkEmptyStructLoader implements ILoader<WritableColumnVector> {
+
   private final WritableColumnVector vector;
   private final int loadSize;
+  private final String[] names;
 
-  public SparkUnionArrayLoader(final WritableColumnVector vector, final int loadSize) {
+  public SparkEmptyStructLoader(final WritableColumnVector vector, final int loadSize) {
     this.vector = vector;
     this.loadSize = loadSize;
-    this.vector.getChild(0).reset();
-    this.vector.getChild(0).reserve(0);
-    if (this.vector.getChild(0).hasDictionary()) {
-      this.vector.getChild(0).reserveDictionaryIds(0);
-      this.vector.getChild(0).setDictionary(null);
+    final StructType structType = (StructType) vector.dataType();
+    this.names = structType.fieldNames();
+    for (int i = 0; i < names.length; i++) {
+      vector.getChild(i).reset();
+      vector.getChild(i).reserve(loadSize);
+      if (vector.getChild(i).hasDictionary()) {
+        vector.getChild(i).reserveDictionaryIds(0);
+        vector.getChild(i).setDictionary(null);
+      }
     }
+  }
+
+  @Override
+  public LoadType getLoaderType() {
+    return LoadType.NULL;
   }
 
   @Override
@@ -44,7 +54,7 @@ public class SparkUnionArrayLoader implements IUnionLoader<WritableColumnVector>
 
   @Override
   public void setNull(final int index) throws IOException {
-    vector.putArray(index, 0, 0);
+    // FIXME:
   }
 
   @Override
@@ -54,22 +64,14 @@ public class SparkUnionArrayLoader implements IUnionLoader<WritableColumnVector>
 
   @Override
   public WritableColumnVector build() throws IOException {
+    for (int i = 0; i < names.length; i++) {
+      SparkEmptyLoader.load(vector.getChild(i), loadSize);
+    }
     return vector;
   }
 
   @Override
-  public void setIndexAndColumnType(final int index, final ColumnType columnType) throws IOException {
-    // FIXME:
-    if (columnType != ColumnType.ARRAY) {
-      vector.putArray(index, 0, 0);
-    }
-  }
-
-  @Override
-  public void loadChild(final ColumnBinary columnBinary, final int childLoadSize) throws IOException {
-    if (columnBinary.columnType == ColumnType.ARRAY) {
-      vector.getChild(0).reserve(childLoadSize);
-      SparkLoaderFactoryUtil.createLoaderFactory(vector).create(columnBinary, childLoadSize);
-    }
+  public boolean isLoadingSkipped() {
+    return true;
   }
 }

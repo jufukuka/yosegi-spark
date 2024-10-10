@@ -14,27 +14,25 @@
  */
 package jp.co.yahoo.yosegi.spark.inmemory.loader;
 
-import jp.co.yahoo.yosegi.binary.ColumnBinary;
-import jp.co.yahoo.yosegi.inmemory.IUnionLoader;
-import jp.co.yahoo.yosegi.spark.inmemory.SparkLoaderFactoryUtil;
-import jp.co.yahoo.yosegi.spread.column.ColumnType;
+import jp.co.yahoo.yosegi.inmemory.ILoader;
+import jp.co.yahoo.yosegi.inmemory.LoadType;
 import org.apache.spark.sql.execution.vectorized.WritableColumnVector;
 
 import java.io.IOException;
 
-public class SparkUnionArrayLoader implements IUnionLoader<WritableColumnVector> {
+public class SparkEmptyMapLoader implements ILoader<WritableColumnVector> {
+
   private final WritableColumnVector vector;
   private final int loadSize;
 
-  public SparkUnionArrayLoader(final WritableColumnVector vector, final int loadSize) {
+  public SparkEmptyMapLoader(final WritableColumnVector vector, final int loadSize) {
     this.vector = vector;
     this.loadSize = loadSize;
-    this.vector.getChild(0).reset();
-    this.vector.getChild(0).reserve(0);
-    if (this.vector.getChild(0).hasDictionary()) {
-      this.vector.getChild(0).reserveDictionaryIds(0);
-      this.vector.getChild(0).setDictionary(null);
-    }
+  }
+
+  @Override
+  public LoadType getLoaderType() {
+    return LoadType.NULL;
   }
 
   @Override
@@ -44,7 +42,7 @@ public class SparkUnionArrayLoader implements IUnionLoader<WritableColumnVector>
 
   @Override
   public void setNull(final int index) throws IOException {
-    vector.putArray(index, 0, 0);
+    // FIXME:
   }
 
   @Override
@@ -54,22 +52,15 @@ public class SparkUnionArrayLoader implements IUnionLoader<WritableColumnVector>
 
   @Override
   public WritableColumnVector build() throws IOException {
+    vector.getChild(0).reset();
+    vector.getChild(0).reserve(0);
+    vector.getChild(1).reset();
+    vector.getChild(1).reserve(0);
     return vector;
   }
 
   @Override
-  public void setIndexAndColumnType(final int index, final ColumnType columnType) throws IOException {
-    // FIXME:
-    if (columnType != ColumnType.ARRAY) {
-      vector.putArray(index, 0, 0);
-    }
-  }
-
-  @Override
-  public void loadChild(final ColumnBinary columnBinary, final int childLoadSize) throws IOException {
-    if (columnBinary.columnType == ColumnType.ARRAY) {
-      vector.getChild(0).reserve(childLoadSize);
-      SparkLoaderFactoryUtil.createLoaderFactory(vector).create(columnBinary, childLoadSize);
-    }
+  public boolean isLoadingSkipped() {
+    return true;
   }
 }

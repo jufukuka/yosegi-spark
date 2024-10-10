@@ -29,6 +29,10 @@ public class SparkUnionMapLoader implements IUnionLoader<WritableColumnVector> {
   public SparkUnionMapLoader(WritableColumnVector vector, int loadSize) {
     this.vector = vector;
     this.loadSize = loadSize;
+    this.vector.getChild(0).reset();
+    this.vector.getChild(0).reserve(0);
+    this.vector.getChild(1).reset();
+    this.vector.getChild(1).reserve(0);
   }
 
   @Override
@@ -38,12 +42,12 @@ public class SparkUnionMapLoader implements IUnionLoader<WritableColumnVector> {
 
   @Override
   public void setNull(int index) throws IOException {
-    vector.putNull(index);
+    // FIXME:
   }
 
   @Override
   public void finish() throws IOException {
-    //
+    // FIXME:
   }
 
   @Override
@@ -54,9 +58,6 @@ public class SparkUnionMapLoader implements IUnionLoader<WritableColumnVector> {
   @Override
   public void setIndexAndColumnType(int index, ColumnType columnType) throws IOException {
     // FIXME:
-    if (columnType != ColumnType.SPREAD) {
-      vector.putNull(index);
-    }
   }
 
   @Override
