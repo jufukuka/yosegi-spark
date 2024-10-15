@@ -106,7 +106,9 @@ class YosegiFileFormat extends FileFormat with DataSourceRegister with Serializa
     val enableOffHeapColumnVector = sqlConf.offHeapColumnVectorEnabled
     val broadcastedHadoopConf =
       sparkSession.sparkContext.broadcast(new SerializableConfiguration(hadoopConf))
-    val projectionPushdownJson = ProjectionPushdownUtil.createProjectionPushdownJson( requiredSchema )
+    //val projectionPushdownJson = ProjectionPushdownUtil.createProjectionPushdownJson( requiredSchema )
+    val projectionPushdownJson = new ProjectionPushdownUtil().toYosegiPushdownJson(requiredSchema)
+    println(projectionPushdownJson)
     val requiredSchemaJson = requiredSchema.json
     val partitionSchemaJson = partitionSchema.json
     val expandOption:Option[String] = options.get( "spread.reader.expand.column" )
