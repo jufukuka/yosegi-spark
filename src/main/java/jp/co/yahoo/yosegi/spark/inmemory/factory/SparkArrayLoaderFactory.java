@@ -18,12 +18,8 @@ import jp.co.yahoo.yosegi.binary.ColumnBinary;
 import jp.co.yahoo.yosegi.inmemory.ILoader;
 import jp.co.yahoo.yosegi.inmemory.ILoaderFactory;
 import jp.co.yahoo.yosegi.spark.inmemory.loader.SparkArrayLoader;
-import jp.co.yahoo.yosegi.spark.inmemory.loader.SparkConstNullArrayLoader;
-import jp.co.yahoo.yosegi.spark.inmemory.loader.SparkDictionaryNullArrayLoader;
-import jp.co.yahoo.yosegi.spark.inmemory.loader.SparkNullArrayLoader;
-import jp.co.yahoo.yosegi.spark.inmemory.loader.SparkNullLoader;
+import jp.co.yahoo.yosegi.spark.inmemory.loader.SparkEmptylArrayLoader;
 import jp.co.yahoo.yosegi.spark.inmemory.loader.SparkRunLengthEncodingArrayLoader;
-import jp.co.yahoo.yosegi.spark.inmemory.loader.SparkSequentialNullArrayLoader;
 import jp.co.yahoo.yosegi.spark.inmemory.loader.SparkUnionArrayLoader;
 import org.apache.spark.sql.execution.vectorized.WritableColumnVector;
 
@@ -42,38 +38,20 @@ public class SparkArrayLoaderFactory implements ILoaderFactory<WritableColumnVec
     if (columnBinary == null) {
       // FIXME:
       System.out.println("SparkArrayLoaderFactory: columnBinary is null");
-      //return new SparkNullLoader(vector, loadSize);
-      return new SparkNullArrayLoader(vector, loadSize);
+      return new SparkEmptylArrayLoader(vector, loadSize);
     }
     System.out.println("SparkArrayLoaderFactory: columnBinary is " + columnBinary.columnType);
+    System.out.println("SparkArrayLoaderFactory: LoadType: " + getLoadType(columnBinary, loadSize).name());
     switch (getLoadType(columnBinary, loadSize)) {
       case ARRAY:
-        System.out.println("SparkArrayLoaderFactory:ARRAY");
         return new SparkArrayLoader(vector, loadSize);
       case RLE_ARRAY:
-        System.out.println("SparkArrayLoaderFactory:RLE_ARRAY");
         return new SparkRunLengthEncodingArrayLoader(vector, loadSize);
       case UNION:
-        System.out.println("SparkArrayLoaderFactory:UNION");
         return new SparkUnionArrayLoader(vector, loadSize);
       default:
-        // FIXME:
         System.out.println("SparkArrayLoaderFactory: unknown load type");
-        switch (getLoadType(columnBinary, loadSize)) {
-          case SEQUENTIAL:
-            System.out.println("SparkArrayLoaderFactory:SEQUENTIAL");
-            return new SparkSequentialNullArrayLoader(vector, loadSize);
-          case DICTIONARY:
-            System.out.println("SparkArrayLoaderFactory:DICTIONARY");
-            return new SparkDictionaryNullArrayLoader(vector, loadSize);
-          case CONST:
-            System.out.println("SparkArrayLoaderFactory:CONST");
-            return new SparkConstNullArrayLoader(vector, loadSize);
-          case UNION:
-            System.out.println("SparkArrayLoaderFactory:UNION");
-            break;
-        }
-        return new SparkNullLoader(vector, loadSize);
+        return new SparkEmptylArrayLoader(vector, loadSize);
     }
   }
 }

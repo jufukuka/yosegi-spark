@@ -14,25 +14,26 @@
  */
 package jp.co.yahoo.yosegi.spark.inmemory.loader;
 
+import jp.co.yahoo.yosegi.inmemory.ILoader;
 import jp.co.yahoo.yosegi.inmemory.ISequentialLoader;
 import jp.co.yahoo.yosegi.inmemory.LoadType;
 import org.apache.spark.sql.execution.vectorized.WritableColumnVector;
 
 import java.io.IOException;
 
-public class SparkSequentialNullArrayLoader implements ISequentialLoader<WritableColumnVector> {
+public class SparkEmptylArrayLoader implements ILoader<WritableColumnVector> {
 
   private final WritableColumnVector vector;
   private final int loadSize;
 
-  public SparkSequentialNullArrayLoader(final WritableColumnVector vector, final int loadSize) {
+  public SparkEmptylArrayLoader(final WritableColumnVector vector, final int loadSize) {
     this.vector = vector;
     this.loadSize = loadSize;
   }
 
   @Override
   public LoadType getLoaderType() {
-    return LoadType.SEQUENTIAL;
+    return LoadType.NULL;
   }
 
   @Override
@@ -42,18 +43,24 @@ public class SparkSequentialNullArrayLoader implements ISequentialLoader<Writabl
 
   @Override
   public void setNull(final int index) throws IOException {
-    // TODO:
-    vector.putArray(index, 0, 0);
+    // FIXME:
   }
 
   @Override
   public void finish() throws IOException {
     // FIXME:
-    //vector.putNulls(0, loadSize);
   }
 
   @Override
   public WritableColumnVector build() throws IOException {
+    for (int i = 0; i < loadSize; i++) {
+      vector.putArray(i, 0, 0);
+    }
     return vector;
+  }
+
+  @Override
+  public boolean isLoadingSkipped() {
+    return true;
   }
 }
