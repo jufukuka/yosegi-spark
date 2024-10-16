@@ -15,18 +15,17 @@
 package jp.co.yahoo.yosegi.spark.inmemory.loader;
 
 import jp.co.yahoo.yosegi.inmemory.ILoader;
-import jp.co.yahoo.yosegi.inmemory.ISequentialLoader;
 import jp.co.yahoo.yosegi.inmemory.LoadType;
 import org.apache.spark.sql.execution.vectorized.WritableColumnVector;
 
 import java.io.IOException;
 
-public class SparkEmptylArrayLoader implements ILoader<WritableColumnVector> {
+public class SparkEmptyArrayLoader implements ILoader<WritableColumnVector> {
 
   private final WritableColumnVector vector;
   private final int loadSize;
 
-  public SparkEmptylArrayLoader(final WritableColumnVector vector, final int loadSize) {
+  public SparkEmptyArrayLoader(final WritableColumnVector vector, final int loadSize) {
     this.vector = vector;
     this.loadSize = loadSize;
   }

@@ -20,12 +20,12 @@ import org.apache.spark.sql.execution.vectorized.WritableColumnVector;
 
 import java.io.IOException;
 
-public class SparkNullLoader implements ILoader<WritableColumnVector> {
+public class SparkEmptyMapLoader implements ILoader<WritableColumnVector> {
 
   private final WritableColumnVector vector;
   private final int loadSize;
 
-  public SparkNullLoader(final WritableColumnVector vector, final int loadSize) {
+  public SparkEmptyMapLoader(final WritableColumnVector vector, final int loadSize) {
     this.vector = vector;
     this.loadSize = loadSize;
   }
@@ -52,7 +52,10 @@ public class SparkNullLoader implements ILoader<WritableColumnVector> {
 
   @Override
   public WritableColumnVector build() throws IOException {
-    vector.putNulls(0, loadSize);
+    vector.getChild(0).reset();
+    vector.getChild(0).reserve(0);
+    vector.getChild(1).reset();
+    vector.getChild(1).reserve(0);
     return vector;
   }
 

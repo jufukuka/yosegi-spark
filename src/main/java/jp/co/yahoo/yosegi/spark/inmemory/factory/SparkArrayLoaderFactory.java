@@ -18,7 +18,7 @@ import jp.co.yahoo.yosegi.binary.ColumnBinary;
 import jp.co.yahoo.yosegi.inmemory.ILoader;
 import jp.co.yahoo.yosegi.inmemory.ILoaderFactory;
 import jp.co.yahoo.yosegi.spark.inmemory.loader.SparkArrayLoader;
-import jp.co.yahoo.yosegi.spark.inmemory.loader.SparkEmptylArrayLoader;
+import jp.co.yahoo.yosegi.spark.inmemory.loader.SparkEmptyArrayLoader;
 import jp.co.yahoo.yosegi.spark.inmemory.loader.SparkRunLengthEncodingArrayLoader;
 import jp.co.yahoo.yosegi.spark.inmemory.loader.SparkUnionArrayLoader;
 import org.apache.spark.sql.execution.vectorized.WritableColumnVector;
@@ -38,7 +38,7 @@ public class SparkArrayLoaderFactory implements ILoaderFactory<WritableColumnVec
     if (columnBinary == null) {
       // FIXME:
       System.out.println("SparkArrayLoaderFactory: columnBinary is null");
-      return new SparkEmptylArrayLoader(vector, loadSize);
+      return new SparkEmptyArrayLoader(vector, loadSize);
     }
     System.out.println("SparkArrayLoaderFactory: columnBinary is " + columnBinary.columnType);
     System.out.println("SparkArrayLoaderFactory: LoadType: " + getLoadType(columnBinary, loadSize).name());
@@ -51,7 +51,7 @@ public class SparkArrayLoaderFactory implements ILoaderFactory<WritableColumnVec
         return new SparkUnionArrayLoader(vector, loadSize);
       default:
         System.out.println("SparkArrayLoaderFactory: unknown load type");
-        return new SparkEmptylArrayLoader(vector, loadSize);
+        return new SparkEmptyArrayLoader(vector, loadSize);
     }
   }
 }

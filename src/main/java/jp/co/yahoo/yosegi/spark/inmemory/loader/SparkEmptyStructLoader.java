@@ -17,17 +17,32 @@ package jp.co.yahoo.yosegi.spark.inmemory.loader;
 import jp.co.yahoo.yosegi.inmemory.ILoader;
 import jp.co.yahoo.yosegi.inmemory.LoadType;
 import org.apache.spark.sql.execution.vectorized.WritableColumnVector;
+import org.apache.spark.sql.types.ArrayType;
+import org.apache.spark.sql.types.DataType;
+import org.apache.spark.sql.types.MapType;
+import org.apache.spark.sql.types.StructType;
 
 import java.io.IOException;
 
-public class SparkNullLoader implements ILoader<WritableColumnVector> {
+public class SparkEmptyStructLoader implements ILoader<WritableColumnVector> {
 
   private final WritableColumnVector vector;
   private final int loadSize;
+  private final String[] names;
 
-  public SparkNullLoader(final WritableColumnVector vector, final int loadSize) {
+  public SparkEmptyStructLoader(final WritableColumnVector vector, final int loadSize) {
     this.vector = vector;
     this.loadSize = loadSize;
+    final StructType structType = (StructType) vector.dataType();
+    this.names = structType.fieldNames();
+    for (int i = 0; i < names.length; i++) {
+      vector.getChild(i).reset();
+      vector.getChild(i).reserve(loadSize);
+      if (vector.getChild(i).hasDictionary()) {
+        vector.getChild(i).reserveDictionaryIds(0);
+        vector.getChild(i).setDictionary(null);
+      }
+    }
   }
 
   @Override
@@ -52,7 +67,9 @@ public class SparkNullLoader implements ILoader<WritableColumnVector> {
 
   @Override
   public WritableColumnVector build() throws IOException {
-    vector.putNulls(0, loadSize);
+    for (int i = 0; i < names.length; i++) {
+      SparkEmptyLoader.load(vector.getChild(i), loadSize);
+    }
     return vector;
   }
 

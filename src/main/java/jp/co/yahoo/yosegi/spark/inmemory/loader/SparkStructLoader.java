@@ -70,7 +70,8 @@ public class SparkStructLoader implements ISpreadLoader<WritableColumnVector> {
     // NOTE: Fill unloaded columns with nulls.
     for (int i = 0; i < names.length; i++) {
       if (loaderFactoryMap.containsKey(names[i])) {
-        vector.getChild(i).putNulls(0, loadSize);
+        //vector.getChild(i).putNulls(0, loadSize);
+        SparkEmptyLoader.load(vector.getChild(i), loadSize);
       }
     }
     return vector;

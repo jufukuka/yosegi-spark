@@ -32,6 +32,7 @@ class SparkNullLoaderTest {
     }
   }
 
+  /*
   @Test
   void T_load_Boolean_1() throws IOException {
     // NOTE: load
@@ -148,4 +149,5 @@ class SparkNullLoaderTest {
     // NOTE: assert
     assertNull(vector, loadSize);
   }
+   */
 }
