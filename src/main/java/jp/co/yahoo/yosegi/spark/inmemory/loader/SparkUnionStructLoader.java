@@ -25,6 +25,7 @@ import java.io.IOException;
 public class SparkUnionStructLoader implements IUnionLoader<WritableColumnVector> {
   private final WritableColumnVector vector;
   private final int loadSize;
+  private boolean childLoaded;
 
   public SparkUnionStructLoader(WritableColumnVector vector, int loadSize) {
     this.vector = vector;
@@ -38,7 +39,8 @@ public class SparkUnionStructLoader implements IUnionLoader<WritableColumnVector
 
   @Override
   public void setNull(int index) throws IOException {
-    vector.putNull(index);
+    System.out.println("SparkUnionStructLoader.setNull(" + index + ")");
+    //vector.putNull(index);
   }
 
   @Override
@@ -48,20 +50,27 @@ public class SparkUnionStructLoader implements IUnionLoader<WritableColumnVector
 
   @Override
   public WritableColumnVector build() throws IOException {
+    if (!childLoaded) {
+      System.out.println("SparkUnionStructLoader.build():SparkEmptyStructLoader");
+      new SparkEmptyStructLoader(vector, loadSize).build();
+    }
     return vector;
   }
 
   @Override
   public void setIndexAndColumnType(int index, ColumnType columnType) throws IOException {
     // FIXME:
+    System.out.println("SparkUnionStructLoader.setIndexAndColumnType(" + index + "," + columnType + ")");
     if (columnType != ColumnType.SPREAD) {
-      vector.putNull(index);
+      //vector.putNull(index);
     }
   }
 
   @Override
   public void loadChild(ColumnBinary columnBinary, int childLoadSize) throws IOException {
     if (columnBinary.columnType == ColumnType.SPREAD) {
+      System.out.println("SparkUnionStructLoader.loadChild(" + columnBinary.columnName + "," + childLoadSize + ")");
+      childLoaded = true;
       SparkLoaderFactoryUtil.createLoaderFactory(vector).create(columnBinary, childLoadSize);
     }
   }

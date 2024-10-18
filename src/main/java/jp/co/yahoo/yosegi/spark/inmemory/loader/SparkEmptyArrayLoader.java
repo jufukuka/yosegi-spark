@@ -28,6 +28,12 @@ public class SparkEmptyArrayLoader implements ILoader<WritableColumnVector> {
   public SparkEmptyArrayLoader(final WritableColumnVector vector, final int loadSize) {
     this.vector = vector;
     this.loadSize = loadSize;
+    this.vector.getChild(0).reset();
+    this.vector.getChild(0).reserve(0);
+    if (this.vector.getChild(0).hasDictionary()) {
+      this.vector.getChild(0).reserveDictionaryIds(0);
+      this.vector.getChild(0).setDictionary(null);
+    }
   }
 
   @Override

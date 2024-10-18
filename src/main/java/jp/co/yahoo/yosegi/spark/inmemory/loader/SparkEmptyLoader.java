@@ -9,6 +9,7 @@ import java.io.IOException;
 
 public class SparkEmptyLoader {
     public static void load(final WritableColumnVector vector, final int loadSize) throws IOException {
+        System.out.println("SparkEmptyLoader.load: " + loadSize);
         final Class klass = vector.dataType().getClass();
         if (klass == ArrayType.class) {
             new SparkEmptyArrayLoader(vector, loadSize).build();

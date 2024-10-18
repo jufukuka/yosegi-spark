@@ -36,8 +36,11 @@ public class SparkMapLoaderFactory implements ILoaderFactory<WritableColumnVecto
       throws IOException {
     if (columnBinary == null) {
       // FIXME:
+      System.out.println("SparkMapLoaderFactory: columnBinary is null");
       return new SparkEmptyMapLoader(vector, loadSize);
     }
+    System.out.println("SparkMapLoaderFactory: columnBinary is " + columnBinary.columnType);
+    System.out.println("SparkMapLoaderFactory: LoadType: " + getLoadType(columnBinary, loadSize).name());
     switch (getLoadType(columnBinary, loadSize)) {
       case SPREAD:
         return new SparkMapLoader(vector, loadSize);
@@ -45,6 +48,7 @@ public class SparkMapLoaderFactory implements ILoaderFactory<WritableColumnVecto
         return new SparkUnionMapLoader(vector, loadSize);
       default:
         // FIXME:
+        System.out.println("SparkMapLoaderFactory: unknown load type");
         return new SparkEmptyMapLoader(vector, loadSize);
     }
   }

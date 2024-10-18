@@ -36,8 +36,11 @@ public class SparkStructLoaderFactory implements ILoaderFactory<WritableColumnVe
       throws IOException {
     if (columnBinary == null) {
       // FIXME:
+      System.out.println("SparkStructLoaderFactory: columnBinary is null");
       return new SparkEmptyStructLoader(vector, loadSize);
     }
+    System.out.println("SparkStructLoaderFactory: columnBinary is " + columnBinary.columnType);
+    System.out.println("SparkStructLoaderFactory: LoadType: " + getLoadType(columnBinary, loadSize).name());
     switch (getLoadType(columnBinary, loadSize)) {
       case SPREAD:
         return new SparkStructLoader(vector, loadSize);
@@ -45,6 +48,7 @@ public class SparkStructLoaderFactory implements ILoaderFactory<WritableColumnVe
         return new SparkUnionStructLoader(vector, loadSize);
       default:
         // FIXME:
+        System.out.println("SparkStructLoaderFactory: unknown load type");
         return new SparkEmptyStructLoader(vector, loadSize);
     }
   }

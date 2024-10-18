@@ -29,6 +29,10 @@ public class SparkUnionMapLoader implements IUnionLoader<WritableColumnVector> {
   public SparkUnionMapLoader(WritableColumnVector vector, int loadSize) {
     this.vector = vector;
     this.loadSize = loadSize;
+    this.vector.getChild(0).reset();
+    this.vector.getChild(0).reserve(0);
+    this.vector.getChild(1).reset();
+    this.vector.getChild(1).reserve(0);
   }
 
   @Override
@@ -38,7 +42,9 @@ public class SparkUnionMapLoader implements IUnionLoader<WritableColumnVector> {
 
   @Override
   public void setNull(int index) throws IOException {
-    vector.putNull(index);
+    // FIXME
+    System.out.println("SparkUnionMapLoader.setNull(" + index + ")");
+    //vector.putNull(index);
   }
 
   @Override
@@ -54,14 +60,16 @@ public class SparkUnionMapLoader implements IUnionLoader<WritableColumnVector> {
   @Override
   public void setIndexAndColumnType(int index, ColumnType columnType) throws IOException {
     // FIXME:
+    System.out.println("SparkUnionMapLoader.setIndexAndColumnType(" + index + "," + columnType + ")");
     if (columnType != ColumnType.SPREAD) {
-      vector.putNull(index);
+      //vector.putNull(index);
     }
   }
 
   @Override
   public void loadChild(ColumnBinary columnBinary, int childLoadSize) throws IOException {
     if (columnBinary.columnType == ColumnType.SPREAD) {
+      System.out.println("SparkUnionMapLoader.loadChild(" + columnBinary.columnName + "," + childLoadSize + ")");
       SparkLoaderFactoryUtil.createLoaderFactory(vector).create(columnBinary, childLoadSize);
     }
   }
