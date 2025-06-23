@@ -57,7 +57,7 @@
         <spotbugs-maven-plugin.version>3.1.8</spotbugs-maven-plugin.version>
         <spotbugs.version>3.1.9</spotbugs.version>
         <yosegi.base>2.0</yosegi.base>
-        <yosegi.version>${yosegi.base}.5</yosegi.version>
+        <yosegi.version>${yosegi.base}.9</yosegi.version>
         <spark.base>3.3</spark.base>
         <spark.version>${spark.base}.0</spark.version>
         <scala.base>2.12</scala.base>
@@ -89,6 +89,11 @@
         <dependency>
             <groupId>org.apache.spark</groupId>
             <artifactId>spark-sql_${scala.base}</artifactId>
+            <version>${spark.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.spark</groupId>
+            <artifactId>spark-hive_${scala.base}</artifactId>
             <version>${spark.version}</version>
         </dependency>
         <dependency>
